@@ -1,0 +1,6 @@
+interface:
+  display_name: "Graduate PS Trajectory Bridge"
+  short_description: "Connect scattered experiences to a bounded future direction"
+  default_prompt: "Use $graduate-ps-trajectory-bridge to filter and connect my experiences into a credible, non-binding graduate application trajectory."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,66 @@
+{
+  "skill": "graduate-ps-prompt-calibration",
+  "version": "0.1.0",
+  "source_book": "Writing Your Graduate School Application Essay",
+  "darwin_compatible": true,
+  "minimum_pass_rate": 1.0,
+  "notes": "Fixed routing and boundary suite only; no test execution or pass result is claimed.",
+  "test_cases": [
+    {
+      "id": "should-trigger-01",
+      "type": "should_trigger",
+      "prompt": "学校把材料叫 Personal Statement，但官方 prompt 只问拟研究的问题、方法准备和为什么这个项目适合我。请先判断它实际要我完成什么、内容怎么取舍，不要替我起草。",
+      "expected_behavior": "调用 graduate-ps-prompt-calibration；以具体题目而非 Personal Statement 标签定义任务，输出可追溯的内容约束，并把 programme-fit 子任务标记为后续路由。",
+      "notes": "正向场景：标签与实际任务冲突。"
+    },
+    {
+      "id": "should-trigger-02",
+      "type": "should_trigger",
+      "prompt": "申请门户写 750 words，学院的申请 PDF 写 500 words，上传框又标成 SOP。帮我判断哪条约束优先，并列出还需要确认的问题。",
+      "expected_behavior": "调用 graduate-ps-prompt-calibration；核对适用周期、项目层级和提交入口，区分已裁决与未裁决冲突，不凭标签或便利性猜答案。",
+      "notes": "正向场景：多个官方来源互相冲突。"
+    },
+    {
+      "id": "should-trigger-03",
+      "type": "should_trigger",
+      "prompt": "Here is the exact graduate prompt: ‘Describe your academic preparation and future goals; optional personal context may be included.’ Should I use a personal hook or a direct opening, and what should the essay prioritize?",
+      "expected_behavior": "调用 graduate-ps-prompt-calibration；从 prompt 的必答项和 optional 措辞判断内容优先级，并以功能而非通用体裁偏好校准开头。",
+      "notes": "正向场景：有精确题目，需要语气与开头校准。"
+    },
+    {
+      "id": "should-not-trigger-01",
+      "type": "should_not_trigger",
+      "prompt": "我的经历从化学转到数据科学，再转到公共卫生。请把这些真实经历连接成可信的过去—现在—未来轨迹，但不要假装我已经确定最终职业。",
+      "expected_behavior": "不调用 graduate-ps-prompt-calibration；这是已明确的经历轨迹构造任务，应使用 graduate-ps-trajectory-bridge。",
+      "notes": "兄弟 skill 诱饵：trajectory，而非 prompt 判读。"
+    },
+    {
+      "id": "should-not-trigger-02",
+      "type": "should_not_trigger",
+      "prompt": "我的 why-programme 段只是课程和教授名单。请核验项目当前资源，并帮我闭合‘项目为什么适合我、我为什么适合项目’两条链。",
+      "expected_behavior": "不调用 graduate-ps-prompt-calibration；题目任务已明确，应使用 two-way-academic-fit 构造并核验双向 fit。",
+      "notes": "外部 adjacent skill 诱饵：two-way-academic-fit。"
+    },
+    {
+      "id": "should-not-trigger-03",
+      "type": "should_not_trigger",
+      "prompt": "英国 anthropology 硕士申请通常偏个人还是学术语气？请比较当期官方指南和近期近邻样本，也判断篇幅惯例与评审的专业程度。",
+      "expected_behavior": "不调用 graduate-ps-prompt-calibration；用户没有具体项目 prompt，而是在研究领域—角色—受众惯例，应使用 field-role-audience-calibration。",
+      "notes": "外部 adjacent skill 诱饵：field-role-audience-calibration。"
+    },
+    {
+      "id": "edge-01",
+      "type": "edge_case",
+      "prompt": "某个具体目标项目的申请系统只写了 ‘Statement of Purpose’，我在该项目当前官网也没找到进一步题目。请先判断这些官方信息能否支持精确的内容比例；如果不能，只列待确认项，不要用通用惯例补答案。",
+      "expected_behavior": "调用 graduate-ps-prompt-calibration；核验目标项目当期官方来源并停在证据门。若仍无依据，只给暂定任务判断和待确认项，不从 SOP 标签编造固定比例。",
+      "notes": "边界：目标特定的官方来源校准，但证据仍不足以支持精确比例。"
+    },
+    {
+      "id": "edge-02",
+      "type": "edge_case",
+      "prompt": "这是一个 300-word Personal Statement prompt，同时问 community contribution 和 research goals，但我还没提供任何个人经历。请先只校准内容重心，并判断能否仅从 prompt 推断该用哪类个人 hook；不要起草或替我选择经历。",
+      "expected_behavior": "调用 graduate-ps-prompt-calibration 完成 prompt 判读；说明仅凭题目不能选择用户的个人 hook，列出作出该判断仍需的真实证据，不起草也不猜测个人背景。",
+      "notes": "边界：可校准开头功能，但缺少用户事实时不得替用户选择故事。"
+    }
+  ]
+}

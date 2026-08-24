@@ -1,0 +1,66 @@
+{
+  "skill": "evidence-first-graduate-personal-statement",
+  "version": "0.1.0",
+  "source_book": "Writing Your Graduate School Application Essay + max4c grill-me (product-composite)",
+  "darwin_compatible": true,
+  "minimum_pass_rate": 1.0,
+  "notes": "Fixed trigger-boundary prompts only. No test execution or test result is claimed in this file.",
+  "test_cases": [
+    {
+      "id": "should-trigger-01",
+      "type": "should_trigger",
+      "prompt": "我要申请美国的数据科学硕士，手里有项目官网、CV、成绩单、两份项目报告和一版很散的 SOP。请从材料核对、逐项追问到正式成稿和 QA 全程帮我做。",
+      "expected_behavior": "调用本 skill，先读材料和当期官方要求，建立四份项目工件，再一次一问补齐高价值缺口；readiness 均值不高于 0.2 后才正式起草。",
+      "notes": "正向场景：完整端到端研究生申请文书。"
+    },
+    {
+      "id": "should-trigger-02",
+      "type": "should_trigger",
+      "prompt": "这份旧 personal statement 有学校名占位符，几处能力主张找不到证据，而且混进了另一个项目的教授。请从事实层重建，不要只润色句子。",
+      "expected_behavior": "调用本 skill，恢复或创建项目工件，隔离目标项目、审计主张与来源、处理冲突后再起草和 QA。",
+      "notes": "正向场景：旧稿含占位符、无证据主张和跨项目污染。"
+    },
+    {
+      "id": "should-trigger-03",
+      "type": "should_trigger",
+      "prompt": "我是跨专业申请研究生，不确定哪些经历能写进 SOP。请先看我所有材料，每次只问我一个问题，并在证据足够后再写完整版本。",
+      "expected_behavior": "调用本 skill，以材料优先的一次一问流程建立证据地图和轨迹，执行五维 readiness gate 后再正式起草。",
+      "notes": "正向场景：材料挖掘、质询与完整交付。"
+    },
+    {
+      "id": "should-not-trigger-01",
+      "type": "should_not_trigger",
+      "prompt": "学校把文件叫 personal statement，但 500 字题目只问研究问题、方法准备和导师匹配。帮我解释这个 prompt 实际要求什么，不要写正文。",
+      "expected_behavior": "不调用本编排器；路由到 graduate-ps-prompt-calibration。",
+      "notes": "兄弟 skill 诱饵：只做 prompt/genre 校准。"
+    },
+    {
+      "id": "should-not-trigger-02",
+      "type": "should_not_trigger",
+      "prompt": "材料已经选定了。我只想把两次转专业和当前研究连成一条不过度承诺的过去—现在—未来主线，不需要完整 PS。",
+      "expected_behavior": "不调用本编排器；路由到 graduate-ps-trajectory-bridge。",
+      "notes": "兄弟 skill 诱饵：只构造轨迹。"
+    },
+    {
+      "id": "should-not-trigger-03",
+      "type": "should_not_trigger",
+      "prompt": "请把我的博士后 academic cover letter 改得更有说服力，并安排研究、教学和 fit 的段落比例。",
+      "expected_behavior": "不调用本 skill；这是 faculty/postdoc academic cover letter 任务，应使用对应 cover-letter 工作流。",
+      "notes": "外部诱饵：不是研究生学位申请文书。"
+    },
+    {
+      "id": "edge-01",
+      "type": "edge_case",
+      "prompt": "我把项目 prompt 贴给你了，但没有提供经历材料。不要采访，直接替我写一篇完整 SOP。",
+      "expected_behavior": "调用本 skill 识别端到端写作请求，同时尊重不采访的提前退出；输出当前五维风险报告并记录 user override，绝不猜个人事实，也不把未过门草稿标为可提交。",
+      "notes": "边界：用户要求立即起草与证据门禁冲突。"
+    },
+    {
+      "id": "edge-02",
+      "type": "edge_case",
+      "prompt": "请从我的材料到成稿全程做申请文书，但我不想讨论健康、家庭和成绩下滑，也不要在文书里提这些。",
+      "expected_behavior": "调用本 skill，并把敏感内容设为 do_not_disclose 的明确边界；不强迫追问，改用非敏感证据完成地图、门禁、起草和 QA。",
+      "notes": "边界：完整工作流中的敏感披露拒绝。"
+    }
+  ]
+}

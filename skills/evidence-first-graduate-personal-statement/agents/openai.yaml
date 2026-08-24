@@ -1,0 +1,6 @@
+interface:
+  display_name: "Evidence-First Graduate Personal Statement"
+  short_description: "Build verified graduate statements end to end"
+  default_prompt: "Use $evidence-first-graduate-personal-statement to audit my programme requirements and materials, interview me one question at a time, and draft only after the readiness gate."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Graduate PS Prompt Calibration"
+  short_description: "Interpret graduate essay prompts before drafting"
+  default_prompt: "Use $graduate-ps-prompt-calibration to turn this programme's exact PS/SOP prompt and current official instructions into a sourced writing-constraint brief before drafting."
+
+policy:
+  allow_implicit_invocation: true

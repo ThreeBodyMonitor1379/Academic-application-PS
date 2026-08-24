@@ -1,0 +1,66 @@
+{
+  "skill": "graduate-ps-trajectory-bridge",
+  "version": "0.1.0",
+  "source_book": "Writing Your Graduate School Application Essay",
+  "darwin_compatible": true,
+  "minimum_pass_rate": 1.0,
+  "notes": "Eight fixed expectation cases for trigger precision; this file records no executed test results.",
+  "test_cases": [
+    {
+      "id": "should-trigger-01",
+      "type": "should_trigger",
+      "prompt": "我本科读社会学，后来做过用户研究，现在想申请 HCI。经历看起来很散，能不能帮我判断哪些经历该保留，并串成一条可信的方向？",
+      "expected_behavior": "调用 graduate-ps-trajectory-bridge；先建立未来方向锚点，再用它筛选跨专业经历，并只建立有事实支持的问题、方法或能力迁移关系。",
+      "notes": "正向场景：跨专业且需要未来导向的相关性过滤。"
+    },
+    {
+      "id": "should-trigger-02",
+      "type": "should_trigger",
+      "prompt": "My SOP reads like a chronological resume. Reorder it around what matters most for my proposed work and connect past, present, and future without forcing three separate paragraphs.",
+      "expected_behavior": "调用 graduate-ps-trajectory-bridge；按与未来工作的相关性、证据强度和区分价值排序，不机械套用三段式。",
+      "notes": "正向场景：从时间线改为论证重要性结构。"
+    },
+    {
+      "id": "should-trigger-03",
+      "type": "should_trigger",
+      "prompt": "我知道自己想继续做气候数据分析，但还不能承诺以后一定走学术界。请帮我写一个有方向感、又不会把未来说死的发展路径。",
+      "expected_behavior": "调用 graduate-ps-trajectory-bridge；基于现有积累提出具体但非绑定的下一步，避免空泛目标和确定性过强的职业承诺。",
+      "notes": "正向场景：终点不确定时的 bounded commitment。"
+    },
+    {
+      "id": "should-not-trigger-01",
+      "type": "should_not_trigger",
+      "prompt": "学校把这篇材料叫 personal statement，但 prompt 要求 500 字回答研究问题、方法准备和导师匹配。我应该按自传式 PS 写，还是按研究型 SOP 写？",
+      "expected_behavior": "不调用本技能；这是 sibling skill graduate-ps-prompt-calibration 的体裁与任务判定问题。",
+      "notes": "兄弟 skill 诱饵：PS/SOP 标签冲突应先做 prompt calibration。"
+    },
+    {
+      "id": "should-not-trigger-02",
+      "type": "should_not_trigger",
+      "prompt": "请查目标院系今年的课程、实验室和正在招生的导师，并帮我闭合为什么这个项目适合我、我又能贡献什么。",
+      "expected_behavior": "不调用本技能；应使用 two-way-academic-fit 核验当期官方资源并建立双向契合。",
+      "notes": "外部 adjacent skill 诱饵：项目研究与 fit 不是个人轨迹组织。"
+    },
+    {
+      "id": "should-not-trigger-03",
+      "type": "should_not_trigger",
+      "prompt": "我只有成绩单、证书、项目报告和一些零散回答。请先逐项核验事实和追问缺口，再完成整篇 PS、项目契合和最终 QA。",
+      "expected_behavior": "不单独调用本技能；这是 evidence-first-graduate-personal-statement 的端到端编排任务，本技能至多由编排器在轨迹阶段调用。",
+      "notes": "兄弟编排器诱饵：请求范围超出单一轨迹桥接。"
+    },
+    {
+      "id": "edge-case-01",
+      "type": "edge_case",
+      "prompt": "我小时候参加过一次机器人比赛，后来做了计算机视觉项目。其实我不记得比赛是否影响了选方向，但能不能写成‘那次经历点燃了我对 AI 的热情’，让故事更顺？",
+      "expected_behavior": "调用本技能审计轨迹，但拒绝虚构因果；将两段经历写成可确认的并列、积累或后续迁移关系，或先向申请者核实真实影响。",
+      "notes": "模糊边界：任务属于轨迹，但明确测试不得为连贯编造动机。"
+    },
+    {
+      "id": "edge-case-02",
+      "type": "edge_case",
+      "prompt": "我的成绩单有一学期明显下滑，但我不愿披露家庭和健康细节。我仍想让转专业申请的轨迹看起来完整，应该怎么办？",
+      "expected_behavior": "可调用本技能处理整体轨迹，但不得强迫披露；先尊重隐私并用其他已确认经历建立方向，只有在确有解释必要且申请者同意时才使用最少语境连接补救行动与当前准备度。",
+      "notes": "模糊边界：可见弱项与隐私选择同时存在。"
+    }
+  ]
+}

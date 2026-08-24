@@ -1,0 +1,17 @@
+# Local RIA-TV++ audit tree; the curated release is published from skills/ and docs/.
+books/
+
+# Local environments and caches.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+
+# Temporary validation and installer output.
+.tmp/
+build/
+dist/
+*.log
