@@ -1,8 +1,8 @@
 # Graduate Personal Statement Skills
 
-一套面向 Codex 的中文研究生申请文书 skills：先核验项目当期要求和申请者事实，再通过一次一问的证据质询，生成**任务响应准确、主张可追溯、轨迹可信且保留隐私边界**的 Personal Statement、Statement of Purpose 或 application essay。
+一套面向 Codex 的中文研究生申请文书 skills：先审计允许来源和项目当期要求，再按用户栏目一次一问，校准可辩护主张并确认中文证据大纲，最后按需交付英文稿与 LaTeX/PDF。目标是生成**任务响应准确、主张可追溯、轨迹可信且保留答案所有权**的 Personal Statement、Statement of Purpose 或 application essay。
 
-**稳定版：[`v0.1.0`](https://github.com/ThreeBodyMonitor1379/Academic-application-PS/tree/v0.1.0)** · [更新日志](./CHANGELOG.md) · [测试说明](./docs/TESTING.md) · [AGPL-3.0](./LICENSE)
+**稳定版：[`v0.2.0`](https://github.com/ThreeBodyMonitor1379/Academic-application-PS/tree/v0.2.0)** · [更新日志](./CHANGELOG.md) · [测试说明](./docs/TESTING.md) · [AGPL-3.0](./LICENSE)
 
 适用于授课型硕士、研究型硕士和博士申请，并适配不同国家、项目与文书语言。它不是固定模板，也不会用 PS/SOP 标签或通用 handout 覆盖目标方当期官方要求。
 
@@ -18,14 +18,14 @@
 你是本次安装执行 Agent。请直接完成操作，不要只给教程；在满足验收标准前持续检查。
 
 仓库：https://github.com/ThreeBodyMonitor1379/Academic-application-PS
-固定版本：v0.1.0
+固定版本：v0.2.0
 目标：安装该版本 skills/ 下全部 3 个 Codex skills。
 
 3 个目标：evidence-first-graduate-personal-statement、graduate-ps-prompt-calibration、graduate-ps-trajectory-bridge。
 
 执行要求：
 1. 检测实际 Codex skills 目录、操作系统、Python 3.10+ 和现有同名 skills；不要假设固定 HOME 路径。
-2. 从 v0.1.0 tag 下载仓库到系统临时目录；不得从 main 或未经固定的分支安装。优先使用已有 GitHub/skill 安装能力，必要时只对临时副本执行 git clone。
+2. 从 v0.2.0 tag 下载仓库到系统临时目录；不得从 main 或未经固定的分支安装。优先使用已有 GitHub/skill 安装能力，必要时只对临时副本执行 git clone。
 3. 在仓库和 skills 目录之外创建临时虚拟环境，按 requirements-dev.txt 安装固定依赖；不要修改系统 Python，不要在 skill 目录内创建 .venv。
 4. 先运行 scripts/validate_release.py，再分别运行 scripts/quick_validate.py <skill_dir>。要求 3/3 结构校验通过。
 5. 运行 python -m unittest discover -s tests -p 'test_*.py'；要求全部测试实际执行，failures=0、errors=0、skipped=0。
@@ -44,7 +44,7 @@
 
 | 你的情况 | 使用的 skill | 结果 |
 |---|---|---|
-| 只有零散材料、冲突旧稿，或要从要求核验一路做到草稿和 QA | [`evidence-first-graduate-personal-statement`](./skills/evidence-first-graduate-personal-statement/SKILL.md) | 维护证据图和项目状态，一次一问，过 readiness gate 后起草 |
+| 只有零散材料、冲突旧稿，或要从要求核验一路做到草稿和 QA | [`evidence-first-graduate-personal-statement`](./skills/evidence-first-graduate-personal-statement/SKILL.md) | 按表逐问、校准主张并形成中文证据大纲；获批后再起草与排版 |
 | 不确定题目到底要求什么，或 PS/SOP 标签与 prompt 冲突 | [`graduate-ps-prompt-calibration`](./skills/graduate-ps-prompt-calibration/SKILL.md) | 生成带来源的任务、体裁、语气、开头和硬约束简报 |
 | 经历很散、跨专业，或不知道怎样连接过去—现在—未来 | [`graduate-ps-trajectory-bridge`](./skills/graduate-ps-trajectory-bridge/SKILL.md) | 用未来方向过滤经历，建立具体但非绑定的发展轨迹 |
 
@@ -57,7 +57,7 @@
 从原始材料端到端完成一篇文书：
 
 ```text
-请用 $evidence-first-graduate-personal-statement，先读取我提供的项目 prompt、CV、成绩单和旧稿，建立证据地图；每轮只问一个最高价值问题，达到 readiness 门禁后再起草英文 SOP，并交付最终 QA 报告。
+请用 $evidence-first-graduate-personal-statement，忽略我已成型的 PS/CV，只读取我允许的成绩、项目记录和官方要求；按我给定的栏目顺序每轮问一个问题，先形成中文证据大纲。我明确确认该版本后，再起草英文 SOP，并按需交付 LaTeX/PDF 与最终 QA 报告。
 ```
 
 先校准一个名称含混的题目：
@@ -77,20 +77,21 @@
 ## Evidence-first 概览
 
 ```text
-官方要求 → 事实与证据地图 → 一次一问质询 → readiness gate
-        → 轨迹与双向 fit → 正式草稿 → 事实、语言、格式和隐私 QA
+来源审计与官方要求 → 事实地图与主张校准 → 按序一次一问 → readiness gate
+        → 中文证据大纲 → 用户确认 → 英文草稿 → LaTeX/PDF 与最终 QA
 ```
 
-编排器维护四份可恢复产物：
+编排器维护五份可恢复产物：
 
 | 产物 | 记录什么 |
 |---|---|
 | `PS_PROJECT_STATE.md` | 当前阶段、目标、已确认决定、开放问题、质询分数和用户 override |
 | `PS_REQUIREMENTS.md` | 官方链接、核验日期、原始 prompt、字数与格式约束 |
-| `PS_EVIDENCE_MAP.yaml` | 证据来源、事实、本人归因、允许主张、敏感级别、用途与核验状态 |
+| `PS_EVIDENCE_MAP.yaml` | 回答状态、证据来源、本人归因、修改范围、验证阶段、指标口径、主张上限与发布状态 |
+| `PS_CHINESE_OUTLINE.md` | 各栏目已确认事实、拟用主张、证据等级、禁用内容、风险和批准版本 |
 | `PS_QA_REPORT.md` | prompt 覆盖、事实追溯、轨迹、fit、语言、格式、隐私与遗留风险 |
 
-质询每轮只有一个问题，并附 `CURRENT READ` 与 `FRAMING RECOMMENDATION`。五维 readiness 为 Target、Evidence、Trajectory、Fit、Boundaries；歧义均值不高于 `0.2` 才进入正式写作。用户可以知情提前退出，但报告必须保留未解决风险，agent 仍不得猜测事实。
+质询每轮只有一个问题，并固定使用 `CURRENT READ / FRAMING RECOMMENDATION / QUESTION`。五维 readiness 为 Target、Evidence、Trajectory、Fit、Boundaries：平均值不高于 `0.20` 且每个维度不高于 `0.25` 才通过证据门禁。通过后仍须让申请人明确批准某个中文大纲版本；风险 override 不能静默跳过内容所有权门禁，agent 也不得猜测事实。
 
 ## 来源方法与产品组合
 
@@ -99,17 +100,17 @@
 - `graduate-ps-prompt-calibration`：以具体 prompt 与当期官方说明裁决 PS/SOP 标签冲突。
 - `graduate-ps-trajectory-bridge`：用有界的未来方向过滤经历，并按论证重要性建立轨迹。
 
-`evidence-first-graduate-personal-statement` 明确标记为 `product-composite`。它把上述两项方法、证据地图、内部证据段落检查表、项目契合路由、QA，以及对 `max4c/skills` 中 `grill-me` 的一次一问交互适配组合成端到端流程；它不冒充 CMU handout 独有或已单独验证的方法。
+`evidence-first-graduate-personal-statement` 在 `v0.2.0` 标记为 `product-composite+user-conversation-derived`。它把上述两项方法、证据地图、内部证据段落检查表、项目契合路由、QA，以及对 `max4c/skills` 中 `grill-me` 的一次一问交互适配组合成端到端流程；顺序保持、答案状态机、主张校准、大纲批准和排版发布规则只来自匿名访谈中可观察的决策协议，不记录或声称模型隐藏思维链，也不冒充 CMU handout 独有或已单独验证的方法。
 
 ## 手动安装与验证
 
 <details>
 <summary><strong>安全安装全部 3 个 skills</strong></summary>
 
-需要 Git 和 Python 3.10+。以下命令固定到 `v0.1.0`，安装器不会覆盖或混装冲突目录：
+需要 Git 和 Python 3.10+。以下命令固定到 `v0.2.0`，安装器不会覆盖或混装冲突目录：
 
 ```bash
-git clone --branch v0.1.0 --depth 1 \
+git clone --branch v0.2.0 --depth 1 \
   https://github.com/ThreeBodyMonitor1379/Academic-application-PS.git
 cd Academic-application-PS
 
@@ -142,7 +143,7 @@ done
 
 ## 质量、隐私与文档
 
-当前固定测试覆盖每个 skill 的 3 条应触发、3 条不应触发和 2 条边界场景；还包括双轮独立路由盲测、多轮质询协议、三类匿名前向申请场景和安装器的 absent / identical / conflict 状态。结果只说明当前测试集内的路由与流程符合预期，不代表录取率。详见 [测试说明](./docs/TESTING.md)。
+当前固定路由集共 38 条：升级后的编排器为 5 条应触发、6 条不应触发和 11 条边界场景，两个聚焦 skill 各保留 3/3/2。编排器通过两轮独立 `17/17` 路由盲测，诱饵误触发均为 `0/6`；另有五项边界回归和一次完全虚构的端到端 LaTeX/PDF smoke test。结果只说明当前测试集内的路由与流程符合预期，不代表录取率。详见 [测试说明](./docs/TESTING.md)。
 
 隐私硬规则：
 
@@ -157,6 +158,6 @@ done
 
 本仓库采用 [`cangjie-skill`](https://github.com/kangarooking/cangjie-skill) 的 RIA-TV++ 结构、蒸馏流程与 Darwin-compatible 测试格式。核心内容来源为 Carnegie Mellon University Student Academic Success Center, Communication Support 的 [*Writing Your Graduate School Application Essay*](https://www.cmu.edu/student-success/other-resources/handouts/comm-supp-pdfs/grad-app-sop.pdf)；本仓库只发布方法蒸馏，不分发原 PDF、截图、完整范例或申请人材料。
 
-一次一问、先检查已有信息、给出当前判断与推荐、保留退出风险报告的交互层，改编自 [`max4c/skills` 的 `grill-me`](https://github.com/max4c/skills/blob/main/skills/grill-me/SKILL.md)，其原项目采用 MIT License。完整归属见 [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md)。
+一次一问、先检查已有信息、给出当前判断与推荐、保留退出风险报告的交互层，改编自 [`max4c/skills` 的 `grill-me`](https://github.com/max4c/skills/blob/main/skills/grill-me/SKILL.md)，其原项目采用 MIT License。`v0.2.0` 新增方法只保存匿名对话中可观察的访谈与发布协议，不保存隐藏思维链或申请人事实。完整归属见 [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md)。
 
 本仓库依照 [GNU Affero General Public License v3.0](./LICENSE) 发布；该许可证不覆盖 CMU handout、`max4c/skills` 或其他第三方材料。

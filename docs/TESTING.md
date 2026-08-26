@@ -1,10 +1,10 @@
 # 测试说明
 
-本页记录 `v0.1.0` 的可复现测试范围。测试只验证 skill 路由、书面流程约束、发布包结构与安装器的非覆盖行为，不验证申请者事实、实时项目网页、文书的录取效果或任何录取概率。
+本页记录 `v0.2.0` 发布包的可复现测试范围。测试只验证 skill 路由、可观察流程约束、发布包结构与安装器的非覆盖行为，不验证申请者事实、实时项目网页、文书的录取效果或任何录取概率。
 
 ## 环境
 
-- 日期：2026-08-24
+- 日期：2026-08-26
 - 系统：Darwin arm64
 - Python：3.12.13；项目支持 Python 3.10+
 - 依赖：在仓库外的临时虚拟环境安装 `PyYAML==6.0.2`
@@ -12,48 +12,42 @@
 
 ## 固定路由集
 
-每个 skill 的 [`test-prompts.json`](../skills/) 固定 8 条 Darwin-compatible 用例：
+三个 skill 的 [`test-prompts.json`](../skills/) 共包含 38 条 Darwin-compatible 用例。编排器在 `v0.2.0` 扩展了路由与边界集；两个聚焦 skill 的 `v0.1.0` 用例保持不变：
 
-| Skill | 应触发 | 不应触发 | 边界 | 合计 |
-|---|---:|---:|---:|---:|
-| `evidence-first-graduate-personal-statement` | 3 | 3 | 2 | 8 |
-| `graduate-ps-prompt-calibration` | 3 | 3 | 2 | 8 |
-| `graduate-ps-trajectory-bridge` | 3 | 3 | 2 | 8 |
-| **总计** | **9** | **9** | **6** | **24** |
+| Skill | 组件版本 | 应触发 | 不应触发 | 边界 | 合计 |
+|---|---:|---:|---:|---:|---:|
+| `evidence-first-graduate-personal-statement` | 0.2.0 | 5 | 6 | 11 | 22 |
+| `graduate-ps-prompt-calibration` | 0.1.0 | 3 | 3 | 2 | 8 |
+| `graduate-ps-trajectory-bridge` | 0.1.0 | 3 | 3 | 2 | 8 |
+| **总计** |  | **11** | **12** | **15** | **38** |
 
 不应触发用例包含兄弟 skill 与外部相邻能力诱饵：`two-way-academic-fit`、`field-role-audience-calibration` 和 `academic-cover-letter-evidence-map`。
 
 ## 双轮独立盲测
 
-两名 clean-context 评测 agent 各自只收到完整的 skill name/description 路由表和 24 条匿名 prompt。它们未收到 case type、expected behavior、notes、workspace 文件、先前结果或来源文档，并须为每条 prompt 选择一个 primary route。
+升级后的编排器先以 17 条核心路由用例进行两轮 clean-context 盲测。评测 agent 只收到完整的 skill name/description 路由表和匿名 prompt，没有收到 case type、expected behavior、notes、workspace 文件、先前结果或来源文档，并须为每条 prompt 选择一个 primary route。
 
-| 轮次 | 唯一用例 | 正确路由 | 错误 | 跳过 | 诱饵误触发 |
-|---|---:|---:|---:|---:|---:|
-| Final round A | 24 | 24 | 0 | 0 | 0/9 |
-| Final round B | 24 | 24 | 0 | 0 | 0/9 |
-| **合计判断** | **48** | **48** | **0** | **0** | **0/18** |
+| 轮次 | 唯一用例 | 正确路由 | 错误 | 诱饵误触发 |
+|---|---:|---:|---:|---:|
+| Round A | 17 | 17 | 0 | 0/6 |
+| Round B | 17 | 17 | 0 | 0/6 |
 
-因此每个 skill 在两轮中均为 **8/8、100%**；完整结果分别保存在各 skill 的 `test-results.md`。
+随后新增的 `edge-07` 至 `edge-11` 作为聚焦盲测，覆盖 readiness hard cap、排除来源污染、无日志证据状态、只读权限和受污染版本失效。最终回归未发现绕过中文大纲批准的路径。
 
-预终版诊断没有被隐藏：两名最初评测者都把两条 prompt-calibration 边界用例路由到其他能力。一条同时要求“校准”和“完整起草”，另一条只有通用 SOP 标签却要求固定比例，测试文本本身超出了 skill 描述。两条用例被收紧为目标特定的校准任务后，换用两名新的 clean-context 评测者重跑全部 24 条，才得到上表的最终结果。
+两个未修改的聚焦 skill 仍保留 `v0.1.0` 的双轮 **8/8、100%** 结果。各组件的完整结果和限制分别记录在自身 `test-results.md`。
 
-## 质询协议与匿名前向场景
+## 行为压力测试与端到端 smoke test
 
-独立评测者完整读取产品编排器及其四份 references，使用虚构材料执行 9 个 instruction-conformance 场景，结果为 **9/9、100%**：
+独立评测覆盖了按用户栏目保序、混合否定回答、公开代码兼容适配、吞吐率与时延区分、团队成果与个人职责分离、大纲批准、风险 override、排除来源和工作格式 LaTeX。首轮识别出的原子主张拆分、readiness 单项上限、未受控量化阶段和来源污染处置缺口均已修正并重新盲测。
 
-| ID | 场景 | 关键验收 |
-|---|---|---|
-| M1 | 已有材料可发现信息 | 不重复询问，转向最高价值未知项 |
-| M2 | 空泛回答 | 使用固定三段格式，每轮只追问一个最早且重要的缺口 |
-| M3 | 敏感经历 | 停止施压，记录 `do_not_disclose`，改用非敏感证据 |
-| M4 | 用户提前退出 | 保留五维分数、风险与 `user_override: true`，不标 submission-ready |
-| M5 | 官方要求与 handout 冲突 | 当前具体官方规则优先；不硬编码旧默认值 |
-| M6 | readiness 未过门 | 无 override 时禁止正式完整草稿 |
-| F1 | 授课型硕士 | 服从实践导向 prompt，不假设研究或导师 fit |
-| F2 | 研究型硕士／博士 | 区分团队结果与本人贡献，闭合官方 fit 双向链 |
-| F3 | 跨专业＋学业弱项 | 尊重隐私，以恢复证据和真实方法迁移连接，不编造因果 hook |
+完全虚构的端到端 fixture 通过以下门禁：
 
-同一评测还核对：`CURRENT READ → FRAMING RECOMMENDATION → QUESTION` 每轮只有一个问题；评分仅使用 `0 / 0.25 / 0.5 / 0.75 / 1`；五维算术平均值不高于 `0.2` 才通过；四份项目工件名称固定；`two-way-academic-fit` 缺失时只执行最小官方来源 fallback。
+- 在大纲批准前只生成五份项目工件，不生成英文、TeX 或 PDF。
+- 排除的旧 PS/CV 未被读取、搜索、引用或转述。
+- 单独的批准记录明确授权大纲 `v1` 后，才生成 717 词英文稿和对应 TeX。
+- 公开算法只写兼容适配；运行界面吞吐率未被转换成单帧时延；团队资产未个人化。
+- XeLaTeX 成功生成 2 页、50,293 字节 PDF；Times New Roman 字体嵌入，并逐页渲染检查裁切、溢出、密度与断页。
+- 第一版出现近空白第二页后完成一次版式修订，再通过视觉 QA。
 
 ## 结构、发布与安装测试
 

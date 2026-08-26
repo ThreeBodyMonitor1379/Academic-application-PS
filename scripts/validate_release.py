@@ -14,11 +14,24 @@ from typing import Any
 import yaml
 
 
-EXPECTED_SKILLS = {
-    "evidence-first-graduate-personal-statement",
-    "graduate-ps-prompt-calibration",
-    "graduate-ps-trajectory-bridge",
+SKILL_SPECS = {
+    "evidence-first-graduate-personal-statement": {
+        "version": "0.2.0",
+        "test_counts": {"should_trigger": 5, "should_not_trigger": 6, "edge_case": 11},
+        "result_markers": ("17/17", "0/6"),
+    },
+    "graduate-ps-prompt-calibration": {
+        "version": "0.1.0",
+        "test_counts": {"should_trigger": 3, "should_not_trigger": 3, "edge_case": 2},
+        "result_markers": ("8/8", "100%"),
+    },
+    "graduate-ps-trajectory-bridge": {
+        "version": "0.1.0",
+        "test_counts": {"should_trigger": 3, "should_not_trigger": 3, "edge_case": 2},
+        "result_markers": ("8/8", "100%"),
+    },
 }
+EXPECTED_SKILLS = set(SKILL_SPECS)
 ROOT_REQUIRED = {
     ".gitignore",
     "CHANGELOG.md",
@@ -51,7 +64,11 @@ REQUIRED_METADATA = {
     "tags",
     "related_skills",
 }
-PROVENANCE_VALUES = {"source-verified", "product-composite"}
+PROVENANCE_VALUES = {
+    "source-verified",
+    "product-composite",
+    "product-composite+user-conversation-derived",
+}
 LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -113,6 +130,8 @@ def check_links(root: Path, paths: list[Path]) -> list[CheckResult]:
 
 def validate_test_prompts(skill_name: str, path: Path) -> list[CheckResult]:
     scope = str(path.parent.name)
+    spec = SKILL_SPECS[skill_name]
+    expected_counts = spec["test_counts"]
     checks: list[CheckResult] = []
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -120,7 +139,7 @@ def validate_test_prompts(skill_name: str, path: Path) -> list[CheckResult]:
         return [result(scope, "test-prompts-json", False, str(exc))]
 
     checks.append(result(scope, "test-skill-name", data.get("skill") == skill_name, str(data.get("skill"))))
-    checks.append(result(scope, "test-version", data.get("version") == "0.1.0", str(data.get("version"))))
+    checks.append(result(scope, "test-version", data.get("version") == spec["version"], str(data.get("version"))))
     checks.append(result(scope, "darwin-compatible", data.get("darwin_compatible") is True, str(data.get("darwin_compatible"))))
     cases = data.get("test_cases")
     if not isinstance(cases, list):
@@ -141,8 +160,8 @@ def validate_test_prompts(skill_name: str, path: Path) -> list[CheckResult]:
             isinstance(case.get(key), str) and bool(case[key].strip())
             for key in ("id", "type", "prompt", "expected_behavior", "notes")
         )
-    checks.append(result(scope, "test-count", len(cases) == 8, f"found {len(cases)}"))
-    checks.append(result(scope, "test-type-counts", counts == {"should_trigger": 3, "should_not_trigger": 3, "edge_case": 2}, json.dumps(counts, sort_keys=True)))
+    checks.append(result(scope, "test-count", len(cases) == sum(expected_counts.values()), f"found {len(cases)}"))
+    checks.append(result(scope, "test-type-counts", counts == expected_counts, json.dumps(counts, sort_keys=True)))
     checks.append(result(scope, "test-case-fields", complete, "all five fields are non-empty strings" if complete else "missing or invalid field"))
     checks.append(result(scope, "test-id-uniqueness", len(ids) == len(set(ids)) and all(ids), f"{len(set(ids))}/{len(ids)} unique"))
     bait_cases = [case for case in cases if isinstance(case, dict) and case.get("type") == "should_not_trigger"]
@@ -186,7 +205,7 @@ def validate_skill(root: Path, skill_dir: Path) -> list[CheckResult]:
     missing_metadata = sorted(REQUIRED_METADATA - set(metadata or {})) if metadata_ok else sorted(REQUIRED_METADATA)
     checks.append(result(scope, "metadata-fields", metadata_ok and not missing_metadata, "complete" if metadata_ok and not missing_metadata else ", ".join(missing_metadata)))
     if metadata_ok:
-        checks.append(result(scope, "metadata-version", metadata.get("version") == "0.1.0", str(metadata.get("version"))))
+        checks.append(result(scope, "metadata-version", metadata.get("version") == SKILL_SPECS[name]["version"], str(metadata.get("version"))))
         checks.append(result(scope, "metadata-provenance", metadata.get("provenance") in PROVENANCE_VALUES, str(metadata.get("provenance"))))
         checks.append(result(scope, "metadata-tags", isinstance(metadata.get("tags"), list) and bool(metadata.get("tags")), str(metadata.get("tags"))))
         checks.append(result(scope, "metadata-related", isinstance(metadata.get("related_skills"), list), str(metadata.get("related_skills"))))
@@ -215,7 +234,9 @@ def validate_skill(root: Path, skill_dir: Path) -> list[CheckResult]:
     results_path = skill_dir / "test-results.md"
     if results_path.is_file():
         text = results_path.read_text(encoding="utf-8")
-        checks.append(result(scope, "test-results-complete", "8/8" in text and "100%" in text, "contains final 8/8 and 100%" if "8/8" in text and "100%" in text else "final routing result absent"))
+        markers = SKILL_SPECS[name]["result_markers"]
+        complete = all(marker in text for marker in markers)
+        checks.append(result(scope, "test-results-complete", complete, f"required markers: {', '.join(markers)}"))
 
     for path in skill_dir.rglob("*"):
         checks.append(result(scope, "no-symlink", not path.is_symlink(), str(path.relative_to(root))))
