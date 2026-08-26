@@ -1,7 +1,7 @@
 {
   "skill": "evidence-first-graduate-personal-statement",
-  "version": "0.1.0",
-  "source_book": "Writing Your Graduate School Application Essay + max4c grill-me (product-composite)",
+  "version": "0.2.0",
+  "source_book": "Writing Your Graduate School Application Essay + max4c grill-me + observable admissions interview decisions (product-composite)",
   "darwin_compatible": true,
   "minimum_pass_rate": 1.0,
   "notes": "Fixed trigger-boundary prompts only. No test execution or test result is claimed in this file.",
@@ -10,7 +10,7 @@
       "id": "should-trigger-01",
       "type": "should_trigger",
       "prompt": "我要申请美国的数据科学硕士，手里有项目官网、CV、成绩单、两份项目报告和一版很散的 SOP。请从材料核对、逐项追问到正式成稿和 QA 全程帮我做。",
-      "expected_behavior": "调用本 skill，先读材料和当期官方要求，建立四份项目工件，再一次一问补齐高价值缺口；readiness 均值不高于 0.2 后才正式起草。",
+      "expected_behavior": "调用本 skill，先读材料和当期官方要求，建立五份项目工件，再一次一问补齐高价值缺口；生成中文大纲并获得明确批准后才正式起草。",
       "notes": "正向场景：完整端到端研究生申请文书。"
     },
     {
@@ -24,7 +24,7 @@
       "id": "should-trigger-03",
       "type": "should_trigger",
       "prompt": "我是跨专业申请研究生，不确定哪些经历能写进 SOP。请先看我所有材料，每次只问我一个问题，并在证据足够后再写完整版本。",
-      "expected_behavior": "调用本 skill，以材料优先的一次一问流程建立证据地图和轨迹，执行五维 readiness gate 后再正式起草。",
+      "expected_behavior": "调用本 skill，以材料优先的一次一问流程建立证据地图和轨迹，执行五维 readiness gate，生成并获得用户批准的中文大纲后再正式起草。",
       "notes": "正向场景：材料挖掘、质询与完整交付。"
     },
     {
@@ -52,7 +52,7 @@
       "id": "edge-01",
       "type": "edge_case",
       "prompt": "我把项目 prompt 贴给你了，但没有提供经历材料。不要采访，直接替我写一篇完整 SOP。",
-      "expected_behavior": "调用本 skill 识别端到端写作请求，同时尊重不采访的提前退出；输出当前五维风险报告并记录 user override，绝不猜个人事实，也不把未过门草稿标为可提交。",
+      "expected_behavior": "调用本 skill 识别端到端写作请求，同时尊重不采访的提前退出；输出当前五维风险报告并记录 user override，先生成风险大纲并等待明确批准，绝不猜个人事实或把未过门草稿标为可提交。",
       "notes": "边界：用户要求立即起草与证据门禁冲突。"
     },
     {
@@ -61,6 +61,104 @@
       "prompt": "请从我的材料到成稿全程做申请文书，但我不想讨论健康、家庭和成绩下滑，也不要在文书里提这些。",
       "expected_behavior": "调用本 skill，并把敏感内容设为 do_not_disclose 的明确边界；不强迫追问，改用非敏感证据完成地图、门禁、起草和 QA。",
       "notes": "边界：完整工作流中的敏感披露拒绝。"
+    },
+    {
+      "id": "should-trigger-04",
+      "type": "should_trigger",
+      "prompt": "我要申请公共政策硕士。请忽略我以前写好的 PS，阅读成绩、课程论文、志愿活动和实习证明，按我给的六部分表格一次问一个问题，先做中文大纲，我确认后再写英文。",
+      "expected_behavior": "调用本 skill，记录旧 PS 为 excluded source，进入顺序保持模式，逐问建立证据地图；先交中文大纲并等待明确批准。",
+      "notes": "正向场景：非技术专业、来源排除和按表质询。"
+    },
+    {
+      "id": "should-trigger-05",
+      "type": "should_trigger",
+      "prompt": "请从我的研究报告和项目记录重建电子工程 SOP。公开示例、团队成果和我自己的修改要分清，先逐问并给中文大纲；我批准后再完成英文 LaTeX 和 PDF。",
+      "expected_behavior": "调用本 skill，执行 claim calibration、readiness 和大纲批准双门禁；英文起草后按官方要求或工作格式编译并视觉检查 PDF。",
+      "notes": "正向场景：技术主张校准与完整排版交付。"
+    },
+    {
+      "id": "should-not-trigger-04",
+      "type": "should_not_trigger",
+      "prompt": "这项职责的事实和数字都已经核验，请只把它改成一条英文 academic CV bullet。",
+      "expected_behavior": "不调用本编排器；路由到 academic-cv-evidence-bullets。",
+      "notes": "兄弟 skill 诱饵：只改写 CV bullet。"
+    },
+    {
+      "id": "should-not-trigger-05",
+      "type": "should_not_trigger",
+      "prompt": "我只需要为现有 PS 写一段 why programme。请查当前课程和资源，建立双向 fit，不要重做全文。",
+      "expected_behavior": "不调用本编排器；路由到 two-way-academic-fit。",
+      "notes": "兄弟 skill 诱饵：只做 programme fit。"
+    },
+    {
+      "id": "should-not-trigger-06",
+      "type": "should_not_trigger",
+      "prompt": "请从协方差矩阵开始推导 MVDR 权重公式，并给一个 Python 实现。",
+      "expected_behavior": "不调用本 skill；这是纯技术教学和实现任务。",
+      "notes": "外部诱饵：技术名词出现但不是申请文书。"
+    },
+    {
+      "id": "edge-03",
+      "type": "edge_case",
+      "prompt": "继续按表问我：训练参数我忘记了，没有误差日志，核心模型不是我负责，而且这段图像融合我不想记录。",
+      "expected_behavior": "调用本 skill，把混合回答拆成多个原子 claim/子项，分别记录 forgotten、unknown、not_involved 和 excluded_by_user；最多问一个会改变剩余主张的决定性问题，随后降级或移动，不得补参数或重新引入排除项。",
+      "notes": "边界：多种否定状态不可偷换。"
+    },
+    {
+      "id": "edge-04",
+      "type": "edge_case",
+      "prompt": "SOP 项目段里，我运行了公开算法，只改依赖兼容；批处理后界面吞吐从 60 FPS 到 150 FPS，但没有单帧 latency 日志。能写我 developed a low-latency algorithm 吗？",
+      "expected_behavior": "调用完整工作流中的 claim calibration：把数字标为 bench_quantitative_uncontrolled，允许 adapted/ran/observed higher throughput under stated setup，禁止 developed core algorithm 或 reduced per-frame latency，并把说法写入 claim ceiling。",
+      "notes": "边界：公开来源、兼容适配和指标语义。"
+    },
+    {
+      "id": "edge-05",
+      "type": "edge_case",
+      "prompt": "readiness 已经通过，中文大纲也生成了，但我还没确认。请现在直接写英文全文。",
+      "expected_behavior": "调用本 skill 并停在 outline-review；说明 evidence gate 不等于内容批准，等待对具体大纲版本的明确确认后才能起草。",
+      "notes": "边界：大纲批准是不可静默跳过的第二道门。"
+    },
+    {
+      "id": "edge-06",
+      "type": "edge_case",
+      "prompt": "按我的表格继续质询。我说过不要参考旧 PS 和 CV，但你可以看成绩单、项目报告和公开采访。",
+      "expected_behavior": "调用本 skill，维护 source_scope：旧 PS/CV 为 excluded，其他授权材料可读；不得从排除文件恢复动机、措辞或因果。",
+      "notes": "边界：来源白名单和明确排除。"
+    },
+    {
+      "id": "edge-07",
+      "type": "edge_case",
+      "prompt": "readiness 五维是 Target=1、其余四项都是 0，平均正好 0.20。现在可以生成英文全文了吗？",
+      "expected_behavior": "调用本 skill 并保持 HOLD：尽管平均为 0.20，Target 超过 0.25 hard cap；先解决目标与官方要求，之后仍须生成并获得批准的中文大纲。",
+      "notes": "边界：单项完全未知不能被平均值掩盖。"
+    },
+    {
+      "id": "edge-08",
+      "type": "edge_case",
+      "prompt": "我已明确排除旧 PS，但你误读了它，并把里面的动机句放进了中文大纲。接下来怎么办？",
+      "expected_behavior": "调用本 skill，记录 source_contamination，隔离并移除派生措辞、动机、因果和问题 framing，只用允许来源重建；增加受影响大纲版本并重新获得批准。",
+      "notes": "边界：误读禁用来源后的污染处置。"
+    },
+    {
+      "id": "edge-09",
+      "type": "edge_case",
+      "prompt": "我确认这个实验没有保存误差日志，但我记得效果不错。证据地图里该怎么记录？",
+      "expected_behavior": "调用本 skill 的主张校准：把日志可用性单独记为 evidence_availability=absent_confirmed，性能主张仍为 unverified；不得把没有日志写成效果已获确认，也不得补造数字。",
+      "notes": "边界：回答状态、证据可用性和验证状态必须分离。"
+    },
+    {
+      "id": "edge-10",
+      "type": "edge_case",
+      "prompt": "我们正在重建这份硕士 SOP。请只读审计现有五份 PS 工件，告诉我有哪些越级主张，不要修改任何文件。",
+      "expected_behavior": "调用本 skill 的审计规则，但遵守只读权限：读取并报告问题与拟议变更，不创建、更新或删除任何工件。",
+      "notes": "边界：工件维护不能覆盖用户明确的只读请求。"
+    },
+    {
+      "id": "edge-11",
+      "type": "edge_case",
+      "prompt": "被排除的旧稿已经污染了大纲 v1 和英文稿 d1。请止损，但不要删除任何历史文件。",
+      "expected_behavior": "调用本 skill，记录污染与受影响工件，把 v1/d1 写入 invalidated_versions 并隔离，只用允许来源重建 active_version；重开大纲批准，且不在未授权时删除历史文件。",
+      "notes": "边界：来源污染后的版本失效、活动版本与非破坏性处置。"
     }
   ]
 }
