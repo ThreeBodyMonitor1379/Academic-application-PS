@@ -1,4 +1,4 @@
-# Graduate Personal Statement Skills
+# Graduate Personal Statement Skills港新研究生申请工具包
 
 一套面向 Codex 的中文研究生申请文书 skills：先审计允许来源和项目当期要求，再按用户栏目一次一问，校准可辩护主张并确认中文证据大纲，最后按需交付英文稿与 LaTeX/PDF。目标是生成**任务响应准确、主张可追溯、轨迹可信且保留答案所有权**的 Personal Statement、Statement of Purpose 或 application essay。
 
